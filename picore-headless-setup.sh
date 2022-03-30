@@ -7,9 +7,9 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 # IMAGE CONFIGURATION
 # ==============================================================================
 PICORE_ARCH="armv6"
-PICORE_VERSION="9.x"
-PICORE_SUBVERSION="9.0.3"
-PICORE_KERNEL_VERSION="4.9.22"
+PICORE_VERSION="13.x"
+PICORE_SUBVERSION="13.1.0"
+PICORE_KERNEL_VERSION="5.10.77"
 IMG_BLOCKSIZE=512
 IMG_BLOCKS=204800 # 512 * 204800 = 104857600 (~100MB)
 # ==============================================================================
@@ -19,9 +19,14 @@ SSID="YOUR_WIFI_NETWORK_SSID"
 WLANPASS="YOUR_WIFI_PASSWORD"
 WPA_SUPPLICANT_CONF="
 ctrl_interface=/var/run/wpa_supplicant
+update_config=1
+country=US
+ap_scan=1
+
 network={
 ssid=\"$SSID\"
 psk=\"$WLANPASS\"
+scan_ssid=1
 key_mgmt=WPA-PSK
 pairwise=CCMP TKIP
 group=CCMP TKIP
@@ -56,13 +61,13 @@ PICORE_PACKAGES=(	"file"\
 )
 
 PICORE_PACKAGES_WLAN_CLIENT=(	"libnl"\
-								"libiw"\
+								"iw"\
 								"wireless$PICORE_KERNEL_SUFFIX"\
 								"wireless_tools"\
 								"wpa_supplicant"\
 								"openssl"\
 								"openssh"\
-                                "firmware-rpi3-wireless"\
+                                "firmware-rpi-wifi"\
 )
 
 
@@ -378,8 +383,8 @@ function patch_startserialtty(){
       echo " - Patching ${PICORE_FILESYSTEM_DIR}/usr/sbin/startserialtty) for Raspberry Pi Zero W support"
 
 cat <<EOF > "${WORK_DIR}/startserialtty.patch"
---- usr/sbin/startserialtty    2019-01-22 16:53:14.083585562 +0100
-+++ usr/sbin/startserialtty    2019-01-22 16:54:50.906230844 +0100
+--- usr/sbin/startserialtty    2021-11-18 03:52:51.083585562 +0100
++++ usr/sbin/startserialtty    2021-11-18 03:54:51.906230844 +0100
 @@ -4,6 +4,8 @@
  
  if [ "${model:0:20}" = "Raspberry Pi 3 Model" ]; then
@@ -417,4 +422,3 @@ extract_filesystem
 patch_startserialtty
 rebuild_filesystem
 cleanup
-
